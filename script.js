@@ -40,10 +40,12 @@ const GameController = function () {
     {
       name: "player1",
       mark: "X",
+      score: 0,
     },
     {
       name: "player2",
       mark: "O",
+      score: 0,
     },
   ];
 

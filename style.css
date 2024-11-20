@@ -1,0 +1,99 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  position: relative;
+  font-family: Montserrat;
+  background-color: #5a1e76;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.heading-text-img {
+  position: absolute; /* Position relative to the viewport (screen) */
+  bottom: 0; /* Align to the bottom of the screen */
+  left: -20px; /* Align to the left of the screen */
+  width: 30rem; /* Optional: Width of the element */
+  height: 35rem; /* Optional: Height of the element */
+}
+.container {
+  background-color: #2b0040;
+  width: 40.4rem;
+  display: flex;
+  align-self: flex-start;
+  flex-direction: column;
+  gap: 3.5rem;
+  margin-top: 10rem;
+  border-radius: 15px;
+  padding: 5em;
+
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.scores {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.score-box {
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: #111827;
+  width: 5em;
+  height: 5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+  border-radius: 8px;
+}
+
+.p-x {
+  background-color: #48d2fe;
+}
+
+.p-draw {
+  background-color: #bcdbf9;
+}
+
+.p-o {
+  background-color: #e2be00;
+}
+
+.board {
+  width: 100%;
+  padding: 1em;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2em;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cell {
+  background-color: #43115b;
+  font-size: 4rem;
+  border-radius: 5px;
+  aspect-ratio: 1 / 1;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cell:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
+}
