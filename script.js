@@ -1,4 +1,17 @@
-const GameBoard = function () {
+///Cell
+const Cell = function () {
+  let mark = " ";
+
+  const getMark = () => mark;
+  const setMark = (value) => {
+    mark = value;
+  };
+
+  return { getMark, setMark };
+};
+
+//Gameboard
+const GameBoard = (function () {
   const rows = 3;
   const columns = 3;
   let board = [];
@@ -10,32 +23,20 @@ const GameBoard = function () {
     }
   }
 
-  const getBoard = () => board;
-
   const markCell = function (row, column, player) {
-    board[row][column].mark = player.mark;
+    board[row][column].setMark(player.mark);
   };
 
+  const getBoard = () => board;
   const printboard = function () {
     console.log(board);
   };
 
-  return { getBoard, markCell, printboard, board };
-};
-
-///Cell
-const Cell = function () {
-  let mark = "";
-
-  const getMark = () => mark;
-
-  return { mark, getMark };
-};
+  return { getBoard, markCell, printboard };
+})();
 
 ///GameController
-const GameController = function () {
-  const Gameboard = GameBoard();
-  const board = Gameboard.board;
+const GameController = (function () {
   const players = [
     {
       name: "player1",
@@ -48,6 +49,7 @@ const GameController = function () {
       score: 0,
     },
   ];
+  const getPlayers = () => players;
 
   let activePlayer = players[0];
 
@@ -56,11 +58,13 @@ const GameController = function () {
     activePlayer = activePlayer === players[0] ? players[1] : players[0];
   };
 
+  const getactivePlayer = () => activePlayer;
+
   //Playing a round
   const playRound = function (row, column) {
     console.log(`${activePlayer.name} is paying now...`);
-    Gameboard.markCell(row, column, activePlayer);
-    /* collectCellsData(); */
+    GameBoard.markCell(row, column, activePlayer);
+
     if (checkWinner()) {
       console.log(`${activePlayer.name} won the game.`);
       return;
@@ -69,42 +73,102 @@ const GameController = function () {
   };
 
   //const getRow = (row) => board[row]; ::: this is not use cause for the row we can simply use board array
-  const getColumn = (col) => board.map((row) => row[col]);
-  const getLeftDiagonal = () => board.map((row, i) => row[i]);
+  const getColumn = (col) => GameBoard.getBoard().map((row) => row[col]);
+  const getLeftDiagonal = () => GameBoard.getBoard().map((row, i) => row[i]);
   const getRightDiagonal = () =>
-    board.map((row, i) => row[board.length - 1 - i]);
+    GameBoard.getBoard().map(
+      (row, i) => row[GameBoard.getBoard().length - 1 - i]
+    );
 
-  const checkTriplet = function (Cells) {
-    if (Cells.every((cell) => cell.mark === "X")) return true;
-    if (Cells.every((cell) => cell.mark === "O")) return true;
+  const checkTriplet = function (cells) {
+    if (cells.every((cell) => cell.getMark() === "X")) return true;
+    if (cells.every((cell) => cell.getMark() === "O")) return true;
     else return false;
   };
 
-  const getWinningCombination = () => [
-    ...board,
-    [0, 1, 2].map(getColumn),
-    getLeftDiagonal(),
-    getRightDiagonal(),
-  ];
+  const getWinningCombination = () => {
+    const rows = GameBoard.getBoard();
+    const columns = [0, 1, 2].map(getColumn);
+    const diagonals = [getLeftDiagonal(), getRightDiagonal()];
+    return [...rows, ...columns, ...diagonals];
+  };
 
   const checkWinner = function () {
     return getWinningCombination().some(checkTriplet);
   };
 
   return {
-    board,
-    players,
+    getPlayers,
     playRound,
-
+    getactivePlayer,
     checkWinner,
-    checkTriplet,
+    switchPlayer,
   };
+})();
+
+//Renderer
+const Renderer = function () {
+  const playerXScore = document.querySelector(".p-x");
+  const playerOScore = document.querySelector(".p-o");
+  const drawScore = document.querySelector(".p-draw");
+  const boardUI = document.querySelector(".board");
+  const cells = document.querySelectorAll(".cell");
+
+  //Global addEventListener
+  const globalEventListener = function (
+    type,
+    selector,
+    callback,
+    parent = document
+  ) {
+    parent.addEventListener(type, (e) => {
+      if (e.target.matches(selector)) {
+        callback(e);
+      }
+    });
+  };
+
+  //Render board
+  const RenderBoard = function () {
+    const board = GameBoard.getBoard();
+
+    boardUI.textContent = "";
+    let html;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        html = `<div class="cell" data-row="${i}" data-column="${j}">${board[i][
+          j
+        ].getMark()}</div>`;
+
+        boardUI.insertAdjacentHTML("beforeend", html);
+      }
+    }
+  };
+  RenderBoard();
+
+  //Populate board
+  globalEventListener(
+    "click",
+    ".cell",
+    (e) => {
+      let row = e.target.dataset.row;
+      let column = e.target.dataset.column;
+      GameController.playRound(row, column);
+
+      RenderBoard();
+    },
+    boardUI
+  );
 };
+/* GameController.playRound(0, 0);
+GameController.playRound(0, 1);
+GameController.playRound(1, 1);
+GameController.playRound(0, 2);
+GameController.playRound(2, 2);
+/* GameController.playRound(1, 0);
+GameController.playRound(1, 2);
+GameController.playRound(2, 0);
+GameController.playRound(2, 1);
+GameBoard.printboard(); */
 
-const game = GameController();
-
-game.playRound(1, 1);
-game.playRound(1, 2);
-game.playRound(2, 2);
-game.playRound(0, 2);
-game.playRound(0, 0);
+Renderer();
