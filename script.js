@@ -146,11 +146,20 @@ const Renderer = function () {
   };
   RenderBoard();
 
+  //clickSound
+  const soundClick = function () {
+    const click = new Audio("sounds/click.wav");
+    click.currentTime = 0.001;
+
+    click.play();
+  };
+
   //Populate board
   globalEventListener(
     "click",
     ".cell",
     (e) => {
+      soundClick();
       let row = e.target.dataset.row;
       let column = e.target.dataset.column;
       GameController.playRound(row, column);
