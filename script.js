@@ -14,6 +14,7 @@ const Cell = function () {
 const GameBoard = (function () {
   const rows = 3;
   const columns = 3;
+
   let board = [];
 
   for (let i = 0; i < rows; i++) {
@@ -24,7 +25,8 @@ const GameBoard = (function () {
   }
 
   const markCell = function (row, column, player) {
-    board[row][column].setMark(player.mark);
+    if (board[row][column].getMark() === " ")
+      board[row][column].setMark(player.mark);
   };
 
   const getBoard = () => board;
@@ -32,7 +34,17 @@ const GameBoard = (function () {
     console.log(board);
   };
 
-  return { getBoard, markCell, printboard };
+  const resetBoard = function () {
+    board = [];
+    for (let i = 0; i < rows; i++) {
+      board[i] = [];
+      for (let j = 0; j < columns; j++) {
+        board[i].push(Cell());
+      }
+    }
+  };
+
+  return { getBoard, markCell, printboard, resetBoard };
 })();
 
 ///GameController
@@ -50,8 +62,12 @@ const GameController = (function () {
     },
   ];
   const getPlayers = () => players;
-  const drawScore = 0;
+
+  let drawScore = 0;
   const getDrawScore = () => drawScore;
+  const setDrawScore = (value) => {
+    drawScore = value;
+  };
 
   let activePlayer = players[0];
 
@@ -66,8 +82,6 @@ const GameController = (function () {
   const playRound = function (row, column) {
     console.log(`${activePlayer.name} is paying now...`);
     GameBoard.markCell(row, column, activePlayer);
-
-    switchPlayer();
   };
 
   //const getRow = (row) => board[row]; ::: this is not use cause for the row we can simply use board array
@@ -91,21 +105,34 @@ const GameController = (function () {
     return [...rows, ...columns, ...diagonals];
   };
 
-  const checkWinner = function () {
+  const checkRoundWinner = function () {
     return getWinningCombination().some(checkTriplet);
+  };
+
+  //checking draw
+  const checkDraw = function () {
+    if (
+      GameBoard.getBoard()
+        .flat()
+        .every((cellEl) => !(cellEl.getMark() === " "))
+    ) {
+      if (!checkRoundWinner()) return true;
+    } else false;
   };
 
   return {
     getPlayers,
     getDrawScore,
+    setDrawScore,
     playRound,
     getactivePlayer,
-    checkWinner,
+    checkRoundWinner,
+    checkDraw,
     switchPlayer,
   };
 })();
 
-//Renderer
+//////////////Renderer/////////////////////
 const Renderer = function () {
   const menuBtn = document.querySelector(".menu-btn");
   const closeMenuBtn = document.querySelector(".close-btn");
@@ -134,6 +161,7 @@ const Renderer = function () {
   const renderScore = function () {
     playerXScore.textContent = GameController.getPlayers()[0].score;
     playerOScore.textContent = GameController.getPlayers()[1].score;
+    console.log(`Draw score ${GameController.getDrawScore()}`);
     drawScore.textContent = GameController.getDrawScore();
   };
   renderScore();
@@ -145,9 +173,7 @@ const Renderer = function () {
     let html;
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
-        html = `<div class="cell" data-row="${i}" data-column="${j}">${board[i][
-          j
-        ].getMark()}</div>`;
+        html = `<div class="cell" data-row="${i}" data-column="${j}"></div>`;
 
         boardUI.insertAdjacentHTML("beforeend", html);
       }
@@ -172,10 +198,27 @@ const Renderer = function () {
       let row = e.target.dataset.row;
       let column = e.target.dataset.column;
       GameController.playRound(row, column);
-      renderBoard();
-      if (GameController.checkWinner()) {
-        console.log(`${GameController.getactivePlayer().name} won the game.`);
+      const board = GameBoard.getBoard();
+      e.target.textContent = board[row][column].getMark();
+      if (GameController.checkRoundWinner()) {
+        console.log(`${GameController.getactivePlayer().name} won the game`);
+        GameController.getactivePlayer().score += 1;
+        setTimeout(() => {
+          GameBoard.resetBoard();
+          renderBoard();
+        }, 500);
+      } else {
+        GameController.switchPlayer();
       }
+      if (GameController.checkDraw()) {
+        GameController.setDrawScore(GameController.getDrawScore() + 1);
+
+        setTimeout(() => {
+          GameBoard.resetBoard();
+          renderBoard();
+        }, 500);
+      }
+      renderScore();
     },
     boardUI
   );
@@ -193,6 +236,8 @@ const Renderer = function () {
   //menu interaction
   menuBtn.addEventListener("click", showMenu);
   closeMenuBtn.addEventListener("click", hideMenu);
+
+  return { renderBoard, renderScore };
 };
 /* GameController.playRound(0, 0);
 GameController.playRound(0, 1);
