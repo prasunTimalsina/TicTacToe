@@ -65,10 +65,6 @@ const GameController = (function () {
     console.log(`${activePlayer.name} is paying now...`);
     GameBoard.markCell(row, column, activePlayer);
 
-    if (checkWinner()) {
-      console.log(`${activePlayer.name} won the game.`);
-      return;
-    }
     switchPlayer();
   };
 
@@ -108,11 +104,15 @@ const GameController = (function () {
 
 //Renderer
 const Renderer = function () {
+  const menuBtn = document.querySelector(".menu-btn");
+  const closeMenuBtn = document.querySelector(".close-btn");
   const playerXScore = document.querySelector(".p-x");
   const playerOScore = document.querySelector(".p-o");
   const drawScore = document.querySelector(".p-draw");
   const boardUI = document.querySelector(".board");
   const cells = document.querySelectorAll(".cell");
+  const modal = document.querySelector(".modal");
+  console.log(modal);
 
   //Global addEventListener
   const globalEventListener = function (
@@ -128,8 +128,12 @@ const Renderer = function () {
     });
   };
 
+  //RenderScore
+  /*   const renderScore = function(){
+
+  } */
   //Render board
-  const RenderBoard = function () {
+  const renderBoard = function () {
     const board = GameBoard.getBoard();
 
     boardUI.textContent = "";
@@ -144,7 +148,7 @@ const Renderer = function () {
       }
     }
   };
-  RenderBoard();
+  renderBoard();
 
   //clickSound
   const soundClick = function () {
@@ -163,11 +167,27 @@ const Renderer = function () {
       let row = e.target.dataset.row;
       let column = e.target.dataset.column;
       GameController.playRound(row, column);
-
-      RenderBoard();
+      renderBoard();
+      if (GameController.checkWinner()) {
+        console.log(`${GameController.getactivePlayer().name} won the game.`);
+      }
     },
     boardUI
   );
+
+  //Show menu
+  const showMenu = () => {
+    modal.classList.remove("hidden");
+  };
+
+  //Hide menu
+  const hideMenu = () => {
+    modal.classList.add("hidden");
+  };
+
+  //menu interaction
+  menuBtn.addEventListener("click", showMenu);
+  closeMenuBtn.addEventListener("click", hideMenu);
 };
 /* GameController.playRound(0, 0);
 GameController.playRound(0, 1);
