@@ -50,6 +50,8 @@ const GameController = (function () {
     },
   ];
   const getPlayers = () => players;
+  const drawScore = 0;
+  const getDrawScore = () => drawScore;
 
   let activePlayer = players[0];
 
@@ -95,6 +97,7 @@ const GameController = (function () {
 
   return {
     getPlayers,
+    getDrawScore,
     playRound,
     getactivePlayer,
     checkWinner,
@@ -106,13 +109,12 @@ const GameController = (function () {
 const Renderer = function () {
   const menuBtn = document.querySelector(".menu-btn");
   const closeMenuBtn = document.querySelector(".close-btn");
-  const playerXScore = document.querySelector(".p-x");
-  const playerOScore = document.querySelector(".p-o");
-  const drawScore = document.querySelector(".p-draw");
+  const playerXScore = document.querySelector(".p-x-score");
+  const playerOScore = document.querySelector(".p-o-score");
+  const drawScore = document.querySelector(".p-draw-score");
   const boardUI = document.querySelector(".board");
   const cells = document.querySelectorAll(".cell");
   const modal = document.querySelector(".modal");
-  console.log(modal);
 
   //Global addEventListener
   const globalEventListener = function (
@@ -129,9 +131,12 @@ const Renderer = function () {
   };
 
   //RenderScore
-  /*   const renderScore = function(){
-
-  } */
+  const renderScore = function () {
+    playerXScore.textContent = GameController.getPlayers()[0].score;
+    playerOScore.textContent = GameController.getPlayers()[1].score;
+    drawScore.textContent = GameController.getDrawScore();
+  };
+  renderScore();
   //Render board
   const renderBoard = function () {
     const board = GameBoard.getBoard();
