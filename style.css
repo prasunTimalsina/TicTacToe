@@ -168,8 +168,20 @@ body {
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.modal.hidden {
-  opacity: 0; /* Make it invisible */
-  visibility: hidden; /* Prevent interaction */
-  pointer-events: none; /* Ensure no interaction while hidden */
+.modal .results {
+  background-color: #c5a0d7;
+  font-size: 1.5rem;
+  font-weight: 540;
+  width: 15rem;
+  height: 4rem;
+  border-radius: 3px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+  display: none;
 }

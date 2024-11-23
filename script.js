@@ -71,6 +71,12 @@ const GameController = (function () {
 
   let activePlayer = players[0];
 
+  let gameRound = 1;
+  const getGameRound = () => gameRound;
+  const setGameRound = (value) => {
+    gameRound = value;
+  };
+
   //Switch Player
   const switchPlayer = function () {
     activePlayer = activePlayer === players[0] ? players[1] : players[0];
@@ -80,7 +86,7 @@ const GameController = (function () {
 
   //Playing a round
   const playRound = function (row, column) {
-    console.log(`${activePlayer.name} is paying now...`);
+    console.log(`Playing round is ${gameRound}`);
     GameBoard.markCell(row, column, activePlayer);
   };
 
@@ -120,6 +126,24 @@ const GameController = (function () {
     } else false;
   };
 
+  const checkWinner = function () {
+    if (players[0].score === players[1].score) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const resetGame = function () {
+    GameBoard.resetBoard();
+    players.forEach((player) => {
+      player.score = 0;
+    });
+    drawScore = 0;
+    activePlayer = players[0];
+    gameRound = 1;
+  };
+
   return {
     getPlayers,
     getDrawScore,
@@ -129,6 +153,10 @@ const GameController = (function () {
     checkRoundWinner,
     checkDraw,
     switchPlayer,
+    getGameRound,
+    setGameRound,
+    checkWinner,
+    resetGame,
   };
 })();
 
@@ -140,9 +168,10 @@ const Renderer = function () {
   const playerOScore = document.querySelector(".p-o-score");
   const drawScore = document.querySelector(".p-draw-score");
   const boardUI = document.querySelector(".board");
-  const cells = document.querySelectorAll(".cell");
-  const modal = document.querySelector(".modal");
 
+  const modal = document.querySelector(".modal");
+  const result = document.querySelector(".results");
+  const newGameBtn = document.querySelector(".new-game-btn");
   //Global addEventListener
   const globalEventListener = function (
     type,
@@ -189,36 +218,42 @@ const Renderer = function () {
     click.play();
   };
 
-  //Populate board
+  //Main Game
   globalEventListener(
     "click",
     ".cell",
     (e) => {
-      soundClick();
-      let row = e.target.dataset.row;
-      let column = e.target.dataset.column;
-      GameController.playRound(row, column);
-      const board = GameBoard.getBoard();
-      e.target.textContent = board[row][column].getMark();
-      if (GameController.checkRoundWinner()) {
-        console.log(`${GameController.getactivePlayer().name} won the game`);
-        GameController.getactivePlayer().score += 1;
-        setTimeout(() => {
-          GameBoard.resetBoard();
-          renderBoard();
-        }, 500);
-      } else {
-        GameController.switchPlayer();
+      if (GameController.getGameRound() <= 5) {
+        soundClick();
+        let row = e.target.dataset.row;
+        let column = e.target.dataset.column;
+        GameController.playRound(row, column);
+        const board = GameBoard.getBoard();
+        e.target.textContent = board[row][column].getMark();
+        if (GameController.checkRoundWinner()) {
+          console.log(`${GameController.getactivePlayer().name} won the game`);
+          GameController.getactivePlayer().score += 1;
+          GameController.setGameRound(GameController.getGameRound() + 1);
+          setTimeout(() => {
+            GameBoard.resetBoard();
+            renderBoard();
+          }, 500);
+        } else {
+          GameController.switchPlayer();
+        }
+        if (GameController.checkDraw()) {
+          GameController.setDrawScore(GameController.getDrawScore() + 1);
+          GameController.setGameRound(GameController.getGameRound() + 1);
+          setTimeout(() => {
+            GameBoard.resetBoard();
+            renderBoard();
+          }, 500);
+        }
+        renderScore();
       }
-      if (GameController.checkDraw()) {
-        GameController.setDrawScore(GameController.getDrawScore() + 1);
-
-        setTimeout(() => {
-          GameBoard.resetBoard();
-          renderBoard();
-        }, 500);
+      if (GameController.getGameRound() > 5) {
+        showResultsWithMenu();
       }
-      renderScore();
     },
     boardUI
   );
@@ -233,9 +268,38 @@ const Renderer = function () {
     modal.classList.add("hidden");
   };
 
+  //show results with menu
+  const showResultsWithMenu = function () {
+    showMenu();
+    result.style.display = "flex";
+    closeMenuBtn.classList.add("hidden");
+    result.textContent = `${
+      GameController.checkWinner()
+        ? (GameController.getPlayers()[0].score >
+          GameController.getPlayers()[1].score
+            ? "PlayerX"
+            : "PlayerO") + " won the game 🎉"
+        : "Game was draw 😔"
+    }`;
+  };
+
+  //Hide results
+
+  //Reset UI
+  const ResetUI = function () {
+    GameController.resetGame();
+    renderScore();
+    renderBoard();
+    hideMenu();
+    closeMenuBtn.classList.remove("hidden");
+    result.textContent = "";
+    result.style.display = "none";
+  };
+
   //menu interaction
   menuBtn.addEventListener("click", showMenu);
   closeMenuBtn.addEventListener("click", hideMenu);
+  newGameBtn.addEventListener("click", ResetUI);
 
   return { renderBoard, renderScore };
 };
