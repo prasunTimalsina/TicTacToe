@@ -237,7 +237,7 @@ const Renderer = function () {
           setTimeout(() => {
             GameBoard.resetBoard();
             renderBoard();
-          }, 500);
+          }, 50);
         } else {
           GameController.switchPlayer();
         }
